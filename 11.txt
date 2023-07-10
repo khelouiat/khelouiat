@@ -1,0 +1,124 @@
+# Ce programme vous permettra de tester votre ESC et votre moteur brushless.
+# Assurez-vous que votre batterie n'est pas connectée si vous allez d'abord la calibrer.
+# Puisque vous testez votre moteur, j'espère que vous n'avez pas votre hélice attachée sinon vous avez des ennuis mon ami...?
+# Ce programme est réalisé par AGT @instructable.com. NE PAS REPUBLIER CE PROGRAMME... en fait le programme lui-même est nuisible pssst Ce n'est pas, c'est sûr.
+
+import os #importation de la bibliothèque os afin de communiquer avec le système
+import time #bibliothèque de temps d'importation pour faire attendre Rpi car c'est trop impatient
+os.system ("sudo pigpiod") #Lancement de la bibliothèque GPIO
+time.sleep(1) # Comme je l'ai dit, il est trop impatient et donc si ce délai est supprimé, vous obtiendrez une erreur
+import pigpio #importation de la bibliothèque GPIO
+
+ESC = 4 #Connectez l'ESC dans cette broche GPIO
+
+pi = pigpio.pi();
+pi.set_servo_pulsewidth(ESC, 0)
+
+max_value = 2000 # changez ceci si la valeur maximale de votre ESC est différente ou laissez-la telle quelle
+min_value = 700 # changez ceci si la valeur min de votre ESC est différente ou laissez-la telle quelle
+print "Pour le premier lancement, sélectionnez calibrer"
+print "Tapez le mot exact pour la fonction que vous voulez"
+imprimer "calibrer OU manuel OU contrôler OU armer OU arrêter"
+
+def manual_drive() : #Vous utiliserez cette fonction pour programmer votre ESC si nécessaire
+    print "Vous avez sélectionné l'option manuelle alors donnez une valeur entre 0 et votre valeur max"    
+    tandis que Vrai :
+        inp = raw_input()
+        si entrée == "stop":
+            arrêt()
+            casser
+		elif inp == "contrôle":
+			contrôle()
+			casser
+		elif inp == "bras":
+			bras()
+			casser	
+        autre:
+            pi.set_servo_pulsewidth(ESC,inp)
+                
+def calibrate() : #Il s'agit de la procédure d'étalonnage automatique d'un ESC normal
+    pi.set_servo_pulsewidth(ESC, 0)
+    print("Déconnectez la batterie et appuyez sur Entrée")
+    inp = raw_input()
+    si entrée == '' :
+        pi.set_servo_pulsewidth(ESC, max_value)
+        print("Connectez la batterie MAINTENANT.. vous entendrez ici deux bips, puis attendez une tonalité descendante progressive puis appuyez sur Entrée")
+        inp = raw_input()
+        si entrée == '' :            
+            pi.set_servo_pulsewidth(ESC, min_value)
+            imprimer "Wierd hein! Ton spécial"
+            temps.sommeil(7)
+            imprimer "Attendez-le ...."
+            temps.sommeil (5)
+            print "Je travaille dessus, NE VOUS INQUIETEZ PAS JUSTE ATTENDEZ...."
+            pi.set_servo_pulsewidth(ESC, 0)
+            temps.sommeil(2)
+            print "Armement ESC maintenant..."
+            pi.set_servo_pulsewidth(ESC, min_value)
+            temps.sommeil(1)
+            imprimer "Voir.... uhhhhh"
+            control() # Vous pouvez changer ceci en n'importe quelle autre fonction que vous voulez
+            
+def control() :
+    print "Je démarre le moteur, j'espère qu'il est calibré et armé, sinon redémarrez en donnant 'x'"
+    temps.sommeil(1)
+    speed = 1500 # changez votre vitesse si vous le souhaitez.... elle devrait être comprise entre 700 et 2000
+    print "Commandes - a pour diminuer la vitesse & d pour augmenter la vitesse OU q pour diminuer beaucoup de vitesse & e pour augmenter beaucoup de vitesse"
+    tandis que Vrai :
+        pi.set_servo_pulsewidth(ESC, vitesse)
+        inp = raw_input()
+        
+        si entrée == "q":
+            vitesse -= 100 # décrémenter la vitesse comme l'enfer
+            imprime "vitesse = %d" % vitesse
+        elif entrée == "e":    
+            vitesse += 100 # incrémentant la vitesse comme l'enfer
+            imprime "vitesse = %d" % vitesse
+        elif entrée == "d":
+            vitesse += 10 # incrémentant la vitesse
+            imprime "vitesse = %d" % vitesse
+        elif entrée == "a":
+            vitesse -= 10 # décrémentation de la vitesse
+            imprime "vitesse = %d" % vitesse
+        elif inp == "stop":
+            stop() #aller pour la fonction stop
+            casser
+        elif inp == "manuel":
+            manual_drive()
+            casser
+		elif inp == "bras":
+			bras()
+			casser	
+        autre:
+            imprimer "QU'EST-CE QUE J'AI DIT !! Appuyez sur a, q, d ou e"
+            
+def arm() : #Il s'agit de la procédure d'armement d'un ESC
+    imprimer "Connectez la batterie et appuyez sur Entrée"
+    inp = raw_input()    
+    si entrée == '' :
+        pi.set_servo_pulsewidth(ESC, 0)
+        temps.sommeil(1)
+        pi.set_servo_pulsewidth(ESC, max_value)
+        temps.sommeil(1)
+        pi.set_servo_pulsewidth(ESC, min_value)
+        temps.sommeil(1)
+        contrôle()
+        
+def stop() : #Cela arrêtera bien sûr toutes les actions que votre Pi effectue pour ESC.
+    pi.set_servo_pulsewidth(ESC, 0)
+    pi.stop()
+
+#C'est le début du programme en fait, pour lancer la fonction il faut l'initialiser avant d'appeler... stupide python.    
+inp = raw_input()
+si inp == "manuel":
+    manual_drive()
+elif inp == "calibrer":
+    étalonner()
+elif inp == "bras":
+    bras()
+elif inp == "contrôle":
+    contrôle()
+elif inp == "stop":
+    arrêt()
+autre :
+    print "Merci de ne pas suivre ce que je dis... maintenant tu dois redémarrer le programme STUPIDE !!"
